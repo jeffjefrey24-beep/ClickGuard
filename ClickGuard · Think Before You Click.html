@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ClickGuard · Think Before You Click</title>
+<style>
+:root{--bg:#f3f6fb;--glass:rgba(255,255,255,.82);--line:rgba(20,50,90,.14);--text:#0b1f33;--muted:#4a5d78;--cyan:#0687a6;--green:#0f9d58;--red:#d4234a;--amber:#b86e00;--ink:#fff;--glow:rgba(6,135,166,.18);--g1:rgba(6,135,166,.14);--g2:rgba(139,92,246,.10);
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050913;--glass:rgba(16,28,49,.72);--line:rgba(120,160,210,.18);--text:#f4f8ff;--muted:#9fb2cc;--cyan:#22d3ee;--green:#34f58a;--red:#ff5373;--amber:#ffb824;--ink:#04101c;--glow:rgba(34,211,238,.28);--g1:rgba(34,211,238,.13);--g2:rgba(139,92,246,.16)}}
+:root[data-theme="dark"]{--bg:#050913;--glass:rgba(16,28,49,.72);--line:rgba(120,160,210,.18);--text:#f4f8ff;--muted:#9fb2cc;--cyan:#22d3ee;--green:#34f58a;--red:#ff5373;--amber:#ffb824;--ink:#04101c;--glow:rgba(34,211,238,.28);--g1:rgba(34,211,238,.13);--g2:rgba(139,92,246,.16)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);font:16px/1.55 "Segoe UI",Calibri,system-ui,sans-serif;background:var(--bg);
+ background-image:radial-gradient(900px 500px at 85% -10%,var(--g1),transparent 60%),radial-gradient(700px 480px at -10% 105%,var(--g2),transparent 60%)}
+.mono{font-family:Consolas,"SFMono-Regular",Menlo,monospace}
+.wrap{max-width:880px;margin:0 auto;padding:18px 18px 56px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:6px 0 30px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em;font-size:18px}
+.logo svg{width:28px;height:28px}
+.icon{background:var(--glass);border:1px solid var(--line);color:var(--muted);width:40px;height:40px;border-radius:10px;cursor:pointer;font-size:16px;backdrop-filter:blur(10px)}
+.icon:hover{color:var(--text);border-color:var(--cyan)}
+.hero{text-align:center;margin-bottom:26px}
+.pill{display:inline-block;padding:5px 14px;border:1px solid var(--line);border-radius:999px;font-size:11.5px;letter-spacing:.2em;color:var(--green);background:var(--glass)}
+h1{font-size:clamp(38px,8vw,64px);line-height:1.02;margin:16px 0 12px;letter-spacing:-.02em;font-weight:800}
+h1 span{background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);max-width:560px;margin:0 auto;font-size:17px}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.search{padding:10px;display:flex;gap:8px;flex-wrap:wrap;box-shadow:0 0 0 1px var(--line),0 10px 50px -12px var(--glow)}
+.search:focus-within{border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan),0 10px 60px -10px var(--glow)}
+.search input{flex:1 1 240px;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font-size:16px;padding:12px 12px}
+.btn{border:0;border-radius:11px;padding:12px 22px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,var(--cyan),var(--green));color:var(--ink);transition:transform .12s,filter .12s}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.sec{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn.sec:hover{color:var(--text);border-color:var(--cyan);transform:none}
+.hint{color:var(--muted);font-size:12.5px;text-align:center;margin:10px 0 0}
+kbd{border:1px solid var(--line);border-radius:5px;padding:0 6px;font-size:11.5px}
+.try{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 0}
+.chip{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--line);color:var(--muted);padding:7px 12px;border-radius:999px;font-size:12.5px;cursor:pointer}
+.chip:hover{color:var(--text);border-color:var(--cyan)}
+.dot{width:8px;height:8px;border-radius:50%}
+#out{margin-top:26px;display:none;padding:24px;animation:rise .35s ease}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.top{display:grid;grid-template-columns:190px 1fr;gap:26px;align-items:center}
+@media(max-width:600px){.top{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.gauge{position:relative;width:180px;height:180px}
+.gauge .n{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.gauge b{font-size:50px;line-height:1;font-weight:800}.gauge small{display:block;color:var(--muted);font-size:12px;letter-spacing:.1em}
+.badge{display:inline-block;padding:3px 12px;border-radius:6px;font-weight:800;font-size:12px;letter-spacing:.14em;color:var(--ink)}
+h2.v{font-size:28px;margin:10px 0 4px;letter-spacing:-.01em}
+.adv{color:var(--muted);margin:0}
+.anat{margin:22px 0 4px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);font-size:14px;overflow-x:auto;white-space:nowrap}
+.anat .l{display:block;font-family:"Segoe UI",sans-serif;font-size:11px;letter-spacing:.16em;color:var(--muted);margin-bottom:6px}
+.anat .s{color:var(--muted)}.anat .d{color:var(--cyan);font-weight:700}.anat .p{color:var(--muted)}
+h3.sec{font-size:12px;letter-spacing:.18em;color:var(--muted);margin:22px 0 10px;font-weight:600}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:600px){.checks{grid-template-columns:1fr}}
+.ck{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-size:13.5px}
+.ck i{font-style:normal;font-weight:800;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;flex:none;color:var(--ink);margin-top:1px}
+.ck.ok i{background:var(--green)}.ck.bad{border-color:var(--red)}.ck.bad i{background:var(--red)}
+.ck .pts{margin-left:auto;font-family:Consolas,monospace;color:var(--red);font-weight:700;padding-left:8px}
+.ck.ok span{color:var(--muted)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.hist{margin-top:22px;padding:18px 20px;display:none}
+.hist header{display:flex;justify-content:space-between;align-items:center}
+.hist h3{margin:0}
+.row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13px;cursor:pointer;margin-top:8px}
+.row:hover .u{color:var(--cyan)}
+.row .u{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.link{background:none;border:0;color:var(--muted);cursor:pointer;font-size:12px}.link:hover{color:var(--text)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:34px}
+@media(max-width:600px){.steps{grid-template-columns:1fr}}
+.step{padding:16px}.step b{font-family:Consolas,monospace;color:var(--cyan);font-size:20px}.step h4{margin:4px 0;font-size:15px}.step p{margin:0;color:var(--muted);font-size:13px}
+footer{margin-top:34px;color:var(--muted);font-size:12.5px;text-align:center}
+#warn{position:fixed;inset:0;background:rgba(3,6,14,.82);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:18px;z-index:9}
+#warn .box{max-width:540px;width:100%;background:var(--bg);border:2px solid var(--red);border-radius:16px;overflow:hidden;box-shadow:0 20px 80px rgba(255,60,90,.35)}
+#warn .hd{background:var(--red);color:#fff;padding:18px 22px;font-size:22px;font-weight:800}
+#warn .bd{padding:20px 22px}
+#warn ul{margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:14px}
+#warn .url{word-break:break-all;color:var(--cyan);font-size:13px}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:10}
+#toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div class="logo"><svg viewBox="0 0 32 32" fill="none"><path d="M16 2l11 4v9c0 7-4.5 12.5-11 15C9.5 27.500 5 22 5 15V6l11-4z" stroke="var(--cyan)" stroke-width="2" fill="var(--g1)"/><path d="M11 16l4 4 7-8" stroke="var(--green)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>ClickGuard</div>
+  <button class="icon" id="theme" title="Toggle light / dark" aria-label="Toggle theme">◐</button>
+</nav>
+
+<section class="hero">
+  <span class="pill mono">PRE-CLICK LINK DEFENCE</span>
+  <h1>Think Before <span>You Click</span></h1>
+  <p>Paste any link and ClickGuard scores it for phishing signs before you ever open it.</p>
+</section>
+
+<div class="glass search">
+  <input id="url" class="mono" type="text" placeholder="Paste a link to check…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Link to check">
+  <button class="btn sec" id="paste">Paste</button>
+  <button class="btn" id="scan">Check link</button>
+</div>
+<p class="hint">Results update as you type · press <kbd>Enter</kbd> to log the scan · <kbd>/</kbd> to focus</p>
+<div class="try" id="try"></div>
+
+<section class="glass" id="out" aria-live="polite">
+  <div class="top">
+    <div class="gauge">
+      <svg viewBox="0 0 120 120" width="180" height="180"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="9"/>
+      <circle id="ring" cx="60" cy="60" r="52" fill="none" stroke="var(--green)" stroke-width="9" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1),stroke .3s"/></svg>
+      <div class="n"><div><b id="num" class="mono">0</b><small>RISK / 100</small></div></div>
+    </div>
+    <div>
+      <span class="badge" id="badge">SAFE</span>
+      <h2 class="v" id="vt"></h2>
+      <p class="adv" id="adv"></p>
+    </div>
+  </div>
+  <div class="anat mono"><span class="l">LINK ANATOMY · the cyan part is who really owns the site</span><span id="anat"></span></div>
+  <h3 class="sec">10 SECURITY CHECKS</h3>
+  <div class="checks" id="checks"></div>
+  <div class="acts"><button class="btn" id="copy">Copy report</button><button class="btn sec" id="clear">Check another link</button></div>
+</section>
+
+<section class="glass hist" id="histCard"><header><h3 class="sec">RECENT CHECKS</h3><button class="link" id="wipe">Clear</button></header><div id="hist"></div></section>
+
+<section class="steps">
+  <div class="glass step"><b>01</b><h4>Parse</h4><p>The link is split into scheme, host and path, and the true domain owner is identified.</p></div>
+  <div class="glass step"><b>02</b><h4>Score</h4><p>Ten checks look for spoofing, look-alikes, hidden destinations and urgency tricks.</p></div>
+  <div class="glass step"><b>03</b><h4>Decide</h4><p>Safe, suspicious or dangerous, with the exact reasons shown in plain language.</p></div>
+</section>
+<footer>Runs entirely in your browser. Links are never opened or sent anywhere.<br>Jefrey Biju · TKMIT · Cyber Security</footer>
+</div>
+
+<div id="warn" role="alertdialog" aria-modal="true" aria-labelledby="wt">
+  <div class="box">
+    <div class="hd" id="wt">⚠ Think Before You Click</div>
+    <div class="bd">
+      <div class="url mono" id="wurl"></div>
+      <p style="margin:12px 0 0"><b id="wscore" style="color:var(--red)"></b> ClickGuard blocked this link because:</p>
+      <ul id="wr"></ul>
+      <div class="acts"><button class="btn" id="back">Go back to safety</button><button class="btn sec" id="proceed">Proceed anyway</button></div>
+      <p id="wnote" style="color:var(--muted);font-size:12.5px;margin:12px 0 0"></p>
+    </div>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+var BRANDS=["paypal","google","apple","microsoft","amazon","facebook","instagram","netflix","sbi","hdfc"];
+var KEYS=["login","signin","verify","secure","update","account","bank","password"];
+var RISKY=["xyz","top","tk","click","zip","gq","cf"];
+var SHORT=["bit.ly","tinyurl.com","t.co","goo.gl","is.gd","cutt.ly"];
+var SECOND=["co","com","org","net","gov","ac"];
+var LEET={"0":"o","1":"l","3":"e","5":"s","$":"s","4":"a"};
+var $=function(i){return document.getElementById(i)};
+var hist=[],last=null,timer=null;
+
+function regDomain(l){var n=l.length;if(n<3)return l.join(".");return(l[n-1].length===2&&SECOND.indexOf(l[n-2])>-1)?l.slice(-3).join("."):l.slice(-2).join(".");}
+var CHECKS=[
+ {ok:"Uses a normal domain name",f:function(c){return /^\d{1,3}(\.\d{1,3}){3}$/.test(c.host)?[35,"Raw IP address instead of a domain name"]:null}},
+ {ok:"No look-alike characters",f:function(c){return(c.host.indexOf("xn--")>-1||/[^\x00-\x7f]/.test(c.url))?[35,"Punycode or Unicode look-alike characters"]:null}},
+ {ok:"Does not imitate a known brand",f:function(c){var n=c.host.replace(/[01354$]/g,function(x){return LEET[x]});for(var i=0;i<BRANDS.length;i++){var b=BRANDS[i];if(n.indexOf(b)>-1&&c.reg!==b+".com"&&c.reg.indexOf(b+".")!==0)return[35,"Imitates '"+b+"' but the real owner is "+c.reg]}return null}},
+ {ok:"Destination is not hidden",f:function(c){return SHORT.indexOf(c.reg)>-1?[30,"URL shortener hides the real destination"]:null}},
+ {ok:"No '@' trick",f:function(c){return c.url.indexOf("@")>-1?[25,"'@' can disguise the real destination"]:null}},
+ {ok:"No urgency keywords",f:function(c){var k=KEYS.filter(function(x){return(c.host+c.u.pathname.toLowerCase()).indexOf(x)>-1});return k.length?[Math.min(10*k.length,20),"Urgency words: "+k.join(", ")]:null}},
+ {ok:"Encrypted with HTTPS",f:function(c){return c.u.protocol!=="https:"?[15,"No HTTPS encryption"]:null}},
+ {ok:"Simple subdomain structure",f:function(c){return c.labels.length>=4?[15,"Deeply nested subdomains"]:null}},
+ {ok:"Reasonable URL length",f:function(c){return c.url.length>75?[10,"Unusually long URL"]:null}},
+ {ok:"Trusted type of domain ending",f:function(c){var t=c.labels[c.labels.length-1];return RISKY.indexOf(t)>-1?[10,"High-abuse domain ending ."+t]:null}}
+];
+var COPY={SAFE:["Looks safe","No risk signals in the link itself. Still check the sender before entering a password."],
+ SUSPICIOUS:["Proceed with caution","This link has warning signs. Don't enter credentials; type the official site address yourself."],
+ DANGEROUS:["Do not open this link","Strong signs of phishing. Delete the message and report it."]};
+
+function analyse(raw){
+  var url=raw.trim(),u;
+  try{u=new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(url)?url:"http://"+url);}catch(e){return null}
+  if(!u.hostname||u.hostname.indexOf(".")<0)return null;
+  var host=u.hostname.toLowerCase(),labels=host.split("."),c={url:url,u:u,host:host,labels:labels,reg:regDomain(labels)};
+  var score=0,res=CHECKS.map(function(k){var r=k.f(c);if(r)score+=r[0];return{ok:k.ok,hit:r}});
+  score=Math.min(score,100);
+  return{url:url,u:u,host:host,reg:c.reg,score:score,res:res,verdict:score<30?"SAFE":score<60?"SUSPICIOUS":"DANGEROUS"};
+}
+function col(v){return v==="SAFE"?"var(--green)":v==="SUSPICIOUS"?"var(--amber)":"var(--red)"}
+function el(t,cls,txt){var e=document.createElement(t);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function toast(m){var t=$("toast");t.textContent=m;t.className="on";setTimeout(function(){t.className=""},1800)}
+
+function count(to){var n=$("num"),from=parseInt(n.textContent)||0,t0=null;function s(t){if(!t0)t0=t;var p=Math.min((t-t0)/600,1);n.textContent=Math.round(from+(to-from)*p);if(p<1)requestAnimationFrame(s)}requestAnimationFrame(s)}
+function anatomy(r){var a=$("anat");a.innerHTML="";var u=r.u;a.appendChild(el("span","s",u.protocol+"//"));
+  var h=r.host,i=h.lastIndexOf(r.reg);
+  if(/^\d/.test(h)||i<0){a.appendChild(el("span","d",h))}else{if(i>0)a.appendChild(el("span","s",h.slice(0,i)));a.appendChild(el("span","d",r.reg))}
+  if(u.port)a.appendChild(el("span","p",":"+u.port));a.appendChild(el("span","p",(u.pathname+u.search).slice(0,60)))}
+function render(r){
+  var c=col(r.verdict);$("out").style.display="block";
+  var rg=$("ring");rg.style.stroke=c;rg.style.strokeDashoffset=String(326.7*(1-r.score/100));$("num").style.color=c;count(r.score);
+  var b=$("badge");b.textContent=r.verdict;b.style.background=c;
+  $("vt").textContent=COPY[r.verdict][0];$("adv").textContent=COPY[r.verdict][1];anatomy(r);
+  var box=$("checks");box.innerHTML="";
+  r.res.slice().sort(function(a,b){return(b.hit?1:0)-(a.hit?1:0)}).forEach(function(x){
+    var d=el("div","ck "+(x.hit?"bad":"ok"));d.appendChild(el("i",null,x.hit?"!":"✓"));d.appendChild(el("span",null,x.hit?x.hit[1]:x.ok));
+    if(x.hit)d.appendChild(el("b","pts","+"+x.hit[0]));box.appendChild(d)});
+  last=r}
+function log(r){hist=hist.filter(function(h){return h.url!==r.url});hist.unshift(r);hist=hist.slice(0,6);
+  var h=$("hist");h.innerHTML="";$("histCard").style.display="block";
+  hist.forEach(function(x){var d=el("div","row");d.appendChild(el("span","u mono",x.url));var s=el("span","mono",x.score+" · "+x.verdict);s.style.color=col(x.verdict);d.appendChild(s);
+    d.onclick=function(){$("url").value=x.url;run(true)};h.appendChild(d)})}
+function modal(r){$("wurl").textContent=r.url;$("wscore").textContent="Risk "+r.score+"/100.";var ul=$("wr");ul.innerHTML="";
+  r.res.filter(function(x){return x.hit}).forEach(function(x){ul.appendChild(el("li",null,x.hit[1]))});$("wnote").textContent="";$("warn").style.display="flex";$("back").focus()}
+function run(explicit){
+  var v=$("url").value;if(!v.trim()){$("out").style.display="none";return}
+  var r=analyse(v);
+  if(!r){if(explicit)toast("That doesn't look like a link yet");return}
+  render(r);if(explicit){log(r);if(r.verdict==="DANGEROUS")modal(r)}}
+
+$("url").addEventListener("input",function(){clearTimeout(timer);timer=setTimeout(function(){run(false)},350)});
+$("url").addEventListener("keydown",function(e){if(e.key==="Enter"){clearTimeout(timer);run(true)}});
+$("scan").onclick=function(){run(true)};
+$("paste").onclick=function(){try{navigator.clipboard.readText().then(function(t){$("url").value=t.trim();run(true)},function(){$("url").focus();toast("Press Ctrl/Cmd+V to paste")})}catch(e){$("url").focus();toast("Press Ctrl/Cmd+V to paste")}};
+$("copy").onclick=function(){if(!last)return;var t="ClickGuard report\nLink: "+last.url+"\nVerdict: "+last.verdict+" ("+last.score+"/100)\n"+last.res.filter(function(x){return x.hit}).map(function(x){return"- "+x.hit[1]+" (+"+x.hit[0]+")"}).join("\n");
+  try{navigator.clipboard.writeText(t).then(function(){toast("Report copied")},function(){toast("Copy not allowed here")})}catch(e){toast("Copy not allowed here")}};
+$("clear").onclick=function(){$("url").value="";$("out").style.display="none";$("url").focus()};
+$("wipe").onclick=function(){hist=[];$("histCard").style.display="none"};
+$("back").onclick=function(){$("warn").style.display="none"};
+$("proceed").onclick=function(){$("wnote").textContent="In a browser extension this would continue to the site. This demo never opens links."};
+document.addEventListener("keydown",function(e){if(e.key==="Escape")$("warn").style.display="none";if(e.key==="/"&&document.activeElement!==$("url")){e.preventDefault();$("url").focus()}});
+$("theme").onclick=function(){var r=document.documentElement,d=r.getAttribute("data-theme");if(!d)d=matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";r.setAttribute("data-theme",d==="dark"?"light":"dark")};
+
+[["https://www.google.com/search?q=cyber","Google search","SAFE"],["https://bit.ly/3xYz","Short link","SUSPICIOUS"],["http://paypa1-secure-login.xyz/verify/account","Fake PayPal","DANGEROUS"],["https://paypal.com.account-verify.top/signin","Hidden domain","DANGEROUS"],["http://192.168.10.5/bank/update","IP address bank","DANGEROUS"],["https://www.sbi.co.in/","SBI official","SAFE"]].forEach(function(s){
+  var b=el("button","chip");var d=el("span","dot");d.style.background=col(s[2]);b.appendChild(d);b.appendChild(document.createTextNode(s[1]));
+  b.onclick=function(){$("url").value=s[0];run(true)};$("try").appendChild(b)});
+})();
+</script>
+</body>
+</html>
